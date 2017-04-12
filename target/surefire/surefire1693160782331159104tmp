@@ -1,0 +1,8 @@
+#surefire
+#Wed Mar 22 17:54:49 MST 2017
+maven.ext.class.path=C\:\\Program Files\\NetBeans 8.2\\java\\maven-nblib\\netbeans-eventspy.jar
+user.dir=G\:\\SER216 Assignments\\BattleShipGame
+file.encoding=UTF-8
+localRepository=C\:\\Users\\Nubian\\.m2\\repository
+basedir=G\:\\SER216 Assignments\\BattleShipGame
+test=battleship.PlayerTest
