@@ -6,12 +6,12 @@ import static com.SER216.BattleShip.Util.boardWidth;
 /**
  * Created by zawata on 4/12/2017.
  */
-public class CPU {
+public class CPU extends Player {
     private final Random rand = new Random();
 
     private String name;
 
-    // CPU values
+    // CPU AI values
     private final boolean[] cpuCompass = new boolean[4];
     private int orientation = 0;
     private boolean hunting = false;
@@ -21,10 +21,6 @@ public class CPU {
     private int cpuStartHit_y;
     private int cpuLastHit_x;
     private int cpuLastHit_y;
-
-    private int[][] board = new int[boardWidth][boardWidth];
-
-    private Ship[] shipFleet = new Ship[5];
 
     public CPU() {
         for(int i = 0; i < board.length; i++) {

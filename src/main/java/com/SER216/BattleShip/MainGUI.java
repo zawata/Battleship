@@ -72,18 +72,21 @@ public class MainGUI {
     public Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 
     //Players
-    Player player;
+    Human player;
     CPU    cpu;
 
     boolean player1_turn = false;
 
     // Loads the GUI for the game
-    public void init(Player player1, CPU cpu) throws IOException {
+    public void init(Human player1, CPU cpu) throws IOException {
 
         this.player = player1;
         this.cpu = cpu;
         
         // player GameBoard
+        playerBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        playerBoard.setBounds(0, 0, 500, 500);
+
         playerBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
         playerBoard.setBounds(0, 0, 500, 500);
 
@@ -95,17 +98,22 @@ public class MainGUI {
         JLabel headerLabel = (new JLabel(new ImageIcon(ImageIO.read(headerIMG))));
         headerLabel.setBounds(0, 0, size_xL, 163);
 
-        playerBoardPanel.add(playerBoard);
-        playerBoardPanel.setLayout(null);
-        playerBoardPanel.setOpaque(true);
-        playerBoardPanel.setBounds(0, 0, 500, 500);
-        playerBoardPanel.addMouseListener(boardListener);
-
         // place Controls
         placePanel.setLayout(null);
         placePanel.setOpaque(true);
         placePanel.setBackground(Color.BLACK);
         placePanel.setBounds(0, 0, 500, 500);
+
+        playerBoardPanel.setLayout(null);
+        cpuBoardPanel.setOpaque(false);
+        playerBoardPanel.add(playerBoard);
+        playerBoardPanel.setBounds(0, 0, 500, 500);
+        playerBoardPanel.addMouseListener(boardListener);
+
+        cpuBoardPanel.setLayout(null);
+        cpuBoardPanel.setOpaque(false);
+        cpuBoardPanel.add(cpuBoard);
+        cpuBoardPanel.setBounds(505, 173, 500, 500);
 
 
         // Directions text
@@ -146,19 +154,7 @@ public class MainGUI {
 
         doneButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                cpuBoardPanel.setBounds(0, 0, 500, 500);
-                cpuBoardPanel.setLayout(null);
-                cpuBoardPanel.setOpaque(false);
-                cpuBoardPanel.add(cpuBoard);
-
-                placePanel.removeAll();
-                placePanel.setLayout(null);
-                placePanel.setOpaque(false);
-                placePanel.setVisible(false);
-
-                cpuBoardPanel.addMouseListener(gameListener);
-                cpuBoardPanel.repaint();
-                playerBoardPanel.removeMouseListener(boardListener);
+            startGame();
             }
 
         });
@@ -183,17 +179,34 @@ public class MainGUI {
         placeFrame.setIconImage(icon);
         placeFrame.setResizable(false);
         placeFrame.setVisible(true);
-
     }
 
-    public boolean redrawBoard(Player player) {
-        playerBoardPanel.removeAll();
+    public void startGame() {
+        //remove setup GUI elements
+        placePanel.removeAll();
+        placePanel.setLayout(null);
+        placePanel.setOpaque(false);
+        placePanel.setVisible(false);
+
+        //add CPU game to the frame
+        placeFrame.remove(placePanel);
+        placeFrame.add(cpuBoardPanel);
+
+        //modify mouse Listeners
+        cpuBoardPanel.addMouseListener(gameListener);
+        playerBoardPanel.removeMouseListener(boardListener);
+
+        placeFrame.repaint();
+    }
+
+    public boolean redrawBoard(Player player, JPanel panel) {
+        panel.removeAll();
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
                 TileColors color = getColorByValue(player.getBoardValue(x, y));
                 if(!color.equals(TileColors.Blank))
                 {
-                    if(!drawPlayerTile(color, x, y)) {
+                    if(!drawTile(panel, color, x, y)) {
                         return false;
                     }
                 }
@@ -202,29 +215,11 @@ public class MainGUI {
 
         // placing the board after the tiles means it will have a higher Z-index
         // thus it will be drawn first.
-        playerBoardPanel.add(playerBoard);
-        playerBoardPanel.repaint();
+        panel.add(playerBoard);
+        panel.repaint();
         return true;
     }
 
-    public void redrawBoard(CPU cpu) {
-        cpuBoardPanel.removeAll();
-        for(int x = 1; x <= boardWidth; x++) {
-            for(int y = 1; y <= boardWidth; y++) {
-                TileColors color = getColorByValue(cpu.getBoardValue(x, y));
-                if(!color.equals(TileColors.Blank))
-                {
-                    drawCPUTile(color, x, y);
-                }
-            }
-        }
-
-        // placing the board after the tiles means it will have a higher Z-index
-        // thus it will be drawn first.
-        cpuBoardPanel.add(cpuBoard);
-        cpuBoardPanel.repaint();
-    }
-
     /*
      * Adds a square to the board grid at the point given
      *
@@ -232,36 +227,12 @@ public class MainGUI {
      * values are 1-indexed
      */
     @SuppressWarnings("Duplicates")
-    private boolean drawPlayerTile(TileColors color, int x, int y) {
+    private boolean drawTile(JPanel panel, TileColors color, int x, int y) {
         try {
             if (x <= 10 && y <= 10) {
                 JLabel img = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
                 img.setBounds(x * 45, y * 45, 45, 45);
-                playerBoardPanel.add(img);
-                return true;
-            }
-        }
-        catch(IOException e) {
-            //TODO Consider removing the exit here? Throw the exception up the chain?
-            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
-        }
-        return false;
-    }
-
-    /*
-     * Adds a square to the board grid at the point given
-     *
-     * values must be given as coordinates
-     * values are 1-indexed
-     */
-    @SuppressWarnings("Duplicates")
-    private boolean drawCPUTile(TileColors color, int x, int y) {
-        try {
-            if (x <= 10 && y <= 10) {
-                JLabel img = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
-                img.setBounds(x * 45, y * 45, 45, 45);
-                playerBoardPanel.setComponentZOrder(img, 0);
+                panel.add(img);
                 return true;
             }
         }
@@ -275,7 +246,7 @@ public class MainGUI {
 
     // Classes-----------------------------------------------------------------
 
-    // Takes values of mouse clicks for the game board.
+    // Mouse Listener for Setup
     public class setupMouseListener implements MouseListener {
         public void mouseClicked(MouseEvent e) {
             int x = Util.getGrid(e.getX());
@@ -286,7 +257,7 @@ public class MainGUI {
             if (x >= 1 && y >= 1) {
                 // the addShip Function performs all of the necessary board checks itself
                 if(player.addShip(selectedShip, x, y)){
-                    redrawBoard(player);
+                    redrawBoard(player, playerBoardPanel);
                 }
                 if (player.allShipsPlaced()) {
                     doneButton.setEnabled(true);
@@ -300,19 +271,20 @@ public class MainGUI {
         public void mouseReleased(MouseEvent arg0) {}
     }
 
-    // Takes values to pass to fire
+    // Mouse Listener for Naval Warfare
     public class gameMouseListener implements MouseListener {
         public void mouseClicked(MouseEvent e) {
             int x = Util.getGrid(e.getX());
             int y = Util.getGrid(e.getY());
+
             if (x >= 1 && y >= 1 && player1_turn) {
-                    if (player.validShot(x, y)) {
-                        player1_turn = false;
-                        //if (!checkWin()) {
-                        //    while (!opponent.cpuFire()
-                        //        checkWin();
-                        //}
-                    }
+                if (player.validShot(x, y)) {
+                    player1_turn = false;
+                    //if (!checkWin()) {
+                    //    while (!opponent.cpuFire()
+                    //        checkWin();
+                    //}
+                }
             }
         }
 
