@@ -1,4 +1,4 @@
-package battleship;
+package com.SER216.BattleShip;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -6,6 +6,8 @@ import java.io.*;
 
 import javax.imageio.*;
 import javax.swing.*;
+
+import static com.SER216.BattleShip.Util.resources;
 
 public class Menu {
 	// Variables
@@ -15,20 +17,20 @@ public class Menu {
 	private JPanel mainPanel = new JPanel();
 	final static int size_x = 350;
 	final static int size_y = 433;
-	final static File file_1 = new File("src/main/java/battleship/img/title_menu.gif");
-	final static File file_2 = new File("src/main/java/battleship/img/credits.jpg");
-	public Image icon = Toolkit.getDefaultToolkit()
-			.getImage("src/main/java/battleship/img/icon.gif");
+	final static File file_1 = new File(resources + "title_menu.gif");
+	final static File file_2 = new File(resources + "credits.jpg");
+	public Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 
 	// Creates the main menu
 	Menu() throws IOException {
 		windowGUI(mainFrame, mainPanel);
 		mainButtons();
-
 	}
 
 	// Makes the window the Menu appears in
 	private void windowGUI(JFrame inFrame, JPanel inPanel) throws IOException {
+		String userDir = System.getProperty("user.dir");
+		System.out.println(userDir);
 
 		if (multi) {
 			centreWindow(inFrame);
@@ -36,15 +38,13 @@ public class Menu {
 			inFrame.getContentPane().setBackground(Color.BLACK);
 			inFrame.setLayout(new GridLayout(2, 1));
 			inFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
 			inPanel.setLayout(new GridLayout(3, 1));
 			inPanel.setOpaque(true);
 			inPanel.setBackground(Color.BLACK);
-			inFrame.add((new JLabel(new ImageIcon(ImageIO.read(file_1)))),
-					BorderLayout.NORTH);
+			inFrame.add((new JLabel(new ImageIcon(ImageIO.read(file_1)))), BorderLayout.NORTH);
 			inFrame.add(inPanel, BorderLayout.SOUTH);
 			inFrame.setResizable(false);
-			Image icon = Toolkit.getDefaultToolkit().getImage("icon.gif");
+			Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 			inFrame.setIconImage(icon);
 			inFrame.setVisible(true);
 		}
