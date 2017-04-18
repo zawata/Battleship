@@ -99,16 +99,6 @@ public class Ship {
         placed = false;
     }
 
-    public void printShips() {
-
-        System.out.println(typeofShip);
-        System.out.println(directionOfShip);
-        System.out.println(x);
-        System.out.println(y);
-        System.out.println(typeofShip.getSize());
-        System.out.println(hits);
-    }
-
     //If hits on this ship equal its size, its sunk
     public boolean sunk() {
         if (this.hits == this.typeofShip.getSize()) {
@@ -169,5 +159,30 @@ public class Ship {
         this.x = 0;
         this.y = 0;
         this.placed = false;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Ship ship = (Ship) o;
+
+        return typeofShip == ship.typeofShip;
+    }
+
+    @Override
+    public int hashCode() {
+        return typeofShip.hashCode();
+    }
+
+    public String toString() {
+        return typeofShip.getName() + " " +
+                directionOfShip.toString() + " " +
+                x + " " +
+                y + " " +
+                typeofShip.getSize() + " " +
+                placed + " " +
+                hits;
     }
 }

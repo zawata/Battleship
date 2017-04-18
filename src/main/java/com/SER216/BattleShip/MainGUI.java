@@ -3,6 +3,8 @@ package com.SER216.BattleShip;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
@@ -14,27 +16,30 @@ import static com.SER216.BattleShip.Util.resources;
 public class MainGUI {
 
     // Main window
-    private JFrame placeFrame = new JFrame("BattleShip");
+    private final JFrame placeFrame = new JFrame("BattleShip");
     private final static int size_xL = 1010;
     private final static int size_yL = 700;
 
-    // Left board components
-    // Right board components
+    private final JPanel placePanel = new JPanel();
+    private final JPanel playerBoardPanel = new JPanel();
+    private final JPanel cpuBoardPanel = new JPanel();
 
-
-    private JPanel playerPanel = new JPanel();
-    private JPanel cpuPanel = new JPanel();
-
-    private MouseListener boardListener = new setupMouseListener();
-    private MouseListener gameListener = new gameMouseListener();
+    private final MouseListener boardListener = new setupMouseListener();
+    private final MouseListener gameListener = new gameMouseListener();
 
     // Ship selection components
     private JList<String> shipList = new JList<>(Ship.getShipNames());
     private JList<String> directionList = new JList<>(Ship.getDirectionNames());
     private JButton doneButton;
+    private JTextArea directionsTxt;
 
     // Files
-    private final static File file_1L = new File(resources + "lg_head.jpg");
+    private final JLabel playerBoard = new JLabel();
+    private final JLabel cpuBoard = new JLabel();
+
+    private final static File headerIMG = new File(resources + "lg_head.jpg");
+    private final static File boardIMG = new File(resources + "board.gif");
+
     private final static File file_green = new File(resources + "green.gif");
     private final static File file_blue = new File(resources + "blue.gif");
     private final static File file_red = new File(resources + "red.gif");
@@ -56,7 +61,7 @@ public class MainGUI {
         public File getFile() { return file; }
     }
 
-    public static TileColors getColorbyValue(int value) {
+    public static TileColors getColorByValue(int value) {
         for (TileColors color : TileColors.values()) {
             if(color.getValue() == value)
                 return color;
@@ -66,61 +71,49 @@ public class MainGUI {
 
     public Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 
-    //Player
+    //Players
     Player player;
     CPU    cpu;
 
     boolean player1_turn = false;
 
     // Loads the GUI for the game
-    public
-    void init(Player player1, CPU cpu) throws IOException {
+    public void init(Player player1, CPU cpu) throws IOException {
 
-        this.player = player;
+        this.player = player1;
         this.cpu = cpu;
-        // Loads the board image and sets size
-        final JLabel board_img = (new JLabel(new ImageIcon(ImageIO.read(new File(resources + "board.gif")))));
-        board_img.setBounds(0, 0, 500, 500);
+        
+        // player GameBoard
+        playerBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        playerBoard.setBounds(0, 0, 500, 500);
 
-        // Makes a second board
-        final JLabel board_img1 = (new JLabel(new ImageIcon(ImageIO.read(new File(resources + "board.gif")))));
-        board_img1.setBounds(0, 0, 500, 500);
+        // cpu GameBoard
+        cpuBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        cpuBoard.setBounds(0, 0, 500, 500);
 
-        // Loads the board image and sets size
-        JLabel img_1L = (new JLabel(new ImageIcon(ImageIO.read(file_1L))));
-        img_1L.setBounds(0, 0, size_xL, 163);
+        // battleship header
+        JLabel headerLabel = (new JLabel(new ImageIcon(ImageIO.read(headerIMG))));
+        headerLabel.setBounds(0, 0, size_xL, 163);
 
-        // Makes the CPU sunk ships appear
-        cpuPanel.setBounds(0, 0, 500, 500);
-        cpuPanel.setLayout(null);
-        cpuPanel.setOpaque(false);
+        playerBoardPanel.add(playerBoard);
+        playerBoardPanel.setLayout(null);
+        playerBoardPanel.setOpaque(true);
+        playerBoardPanel.setBounds(0, 0, 500, 500);
+        playerBoardPanel.addMouseListener(boardListener);
 
-        // Makes the CPU shots appear
-        cpuPanel.setBounds(0, 0, 500, 500);
-        cpuPanel.setLayout(null);
-        cpuPanel.setOpaque(false);
+        // place Controls
+        placePanel.setLayout(null);
+        placePanel.setOpaque(true);
+        placePanel.setBackground(Color.BLACK);
+        placePanel.setBounds(0, 0, 500, 500);
 
-        // Panel to make ships appear on top
-        playerPanel.setBounds(0, 0, 500, 500);
-        playerPanel.setLayout(null);
-        playerPanel.setOpaque(false);
-
-        // Ship board setup
-        //playerPanel.add(cpuSunkPanel);
-        playerPanel.add(cpuPanel);
-        playerPanel.add(board_img);
-        playerPanel.setLayout(null);
-        playerPanel.setOpaque(false);
-        playerPanel.setBackground(Color.BLACK);
-        playerPanel.setBounds(0, 173, 500, 500);
-        playerPanel.addMouseListener(boardListener);
 
         // Directions text
-        JTextArea directionsTxt = new JTextArea("Game directions\n\n");
-        directionsTxt.append("1. Select a ship from the leftmost box below.\n");
-        directionsTxt.append("2. Select a direction from the rightmost box below.\n");
-        directionsTxt.append("3. Select a coordinate for the beginning position of your ship on the grid.\n");
-        directionsTxt.append("4. Click \"Done\" once all 5 ships are placed.\n");
+        directionsTxt = new JTextArea("Game directions\n\n" +
+                "1. Select a ship from the leftmost box below.\n" +
+                "2. Select a direction from the rightmost box below.\n" +
+                "3. Select a coordinate for the beginning position of your ship on the grid.\n" +
+                "4. Click \"Done\" once all 5 ships are placed.\n");
         directionsTxt.setBounds(10, 10, 475, 100);
         directionsTxt.setFont(new Font("Tahoma", Font.PLAIN, 12));
         directionsTxt.setForeground(Color.WHITE);
@@ -149,39 +142,40 @@ public class MainGUI {
         doneButton = new JButton("Done");
         doneButton.setBounds(200, 400, 100, 50);
         doneButton.setEnabled(false);
-        /*
+
+
         doneButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                sunkBoxPanel.setBounds(0, 0, 500, 500);
-                sunkBoxPanel.setLayout(null);
-                sunkBoxPanel.setOpaque(false);
-                fireBoxPanel.setBounds(0, 0, 500, 500);
-                fireBoxPanel.setLayout(null);
-                fireBoxPanel.setOpaque(false);
-                shipPanel.removeAll();
-                shipPanel.add(sunkBoxPanel);
-                shipPanel.add(fireBoxPanel);
-                shipPanel.add(board_img1);
-                shipPanel.addMouseListener(gameListener);
-                shipPanel.repaint();
-                boardPanel.removeMouseListener(boardListener);
+                cpuBoardPanel.setBounds(0, 0, 500, 500);
+                cpuBoardPanel.setLayout(null);
+                cpuBoardPanel.setOpaque(false);
+                cpuBoardPanel.add(cpuBoard);
+
+                placePanel.removeAll();
+                placePanel.setLayout(null);
+                placePanel.setOpaque(false);
+                placePanel.setVisible(false);
+
+                cpuBoardPanel.addMouseListener(gameListener);
+                cpuBoardPanel.repaint();
+                playerBoardPanel.removeMouseListener(boardListener);
             }
 
-        }); */
+        });
 
         // Putting the ship menu next to the player ship board
-        playerPanel.add(doneButton);
-        playerPanel.add(directionsTxt);
-        playerPanel.add(directionList);
-        playerPanel.add(shipList);
-        playerPanel.setLayout(null);
-        playerPanel.setOpaque(false);
-        playerPanel.setBackground(Color.BLACK);
-        playerPanel.setBounds(505, 173, 500, 500);
+        placePanel.add(doneButton);
+        placePanel.add(directionsTxt);
+        placePanel.add(directionList);
+        placePanel.add(shipList);
+
+        placePanel.setBounds(505, 173, 500, 500);
+        playerBoardPanel.setBounds(5, 173, 500, 500);
 
         // Frame setup
-        placeFrame.add(img_1L);
-        placeFrame.add(playerPanel);
+        placeFrame.add(headerLabel);
+        placeFrame.add(placePanel);
+        placeFrame.add(playerBoardPanel);
         placeFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         placeFrame.setSize(size_xL, size_yL);
         placeFrame.getContentPane().setBackground(Color.BLACK);
@@ -191,51 +185,44 @@ public class MainGUI {
         placeFrame.setVisible(true);
 
     }
-/*
-    // Looks to see if you can put the ship down
-    public boolean freeBoard(Player player, Ship ship, int x, int y){
-        if (ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
-            for (int i = 0; i < ship.getSize(); i++) {
-                if(player.getBoardValue(x,(i + y )) == 1){
-                    return false;
-                }
-            }
-        }
-        else
-        {
-            if (ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
-                for (int i = 0; i < (10 - ship.getSize()); i++) {
-                    if(player.getBoardValue(( i + x),y) == 1){
+
+    public boolean redrawBoard(Player player) {
+        playerBoardPanel.removeAll();
+        for(int x = 1; x <= boardWidth; x++) {
+            for(int y = 1; y <= boardWidth; y++) {
+                TileColors color = getColorByValue(player.getBoardValue(x, y));
+                if(!color.equals(TileColors.Blank))
+                {
+                    if(!drawPlayerTile(color, x, y)) {
                         return false;
                     }
                 }
             }
         }
+
+        // placing the board after the tiles means it will have a higher Z-index
+        // thus it will be drawn first.
+        playerBoardPanel.add(playerBoard);
+        playerBoardPanel.repaint();
         return true;
-    }
-*/
-    public void redrawBoard(Player player) {
-        for(int x = 1; x <= boardWidth; x++) {
-            for(int y = 1; y <= boardWidth; y++) {
-                TileColors color = getColorbyValue(player.getBoardValue(x, y));
-                if(!color.equals(TileColors.Blank))
-                {
-                    drawPlayerTile(color, x, y);
-                }
-            }
-        }
     }
 
     public void redrawBoard(CPU cpu) {
+        cpuBoardPanel.removeAll();
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
-                TileColors color = getColorbyValue(cpu.getBoardValue(x, y));
+                TileColors color = getColorByValue(cpu.getBoardValue(x, y));
                 if(!color.equals(TileColors.Blank))
                 {
                     drawCPUTile(color, x, y);
                 }
             }
         }
+
+        // placing the board after the tiles means it will have a higher Z-index
+        // thus it will be drawn first.
+        cpuBoardPanel.add(cpuBoard);
+        cpuBoardPanel.repaint();
     }
 
     /*
@@ -244,56 +231,44 @@ public class MainGUI {
      * values must be given as coordinates
      * values are 1-indexed
      */
-
-    public boolean drawPlayerTile(TileColors color, int x, int y) {
-        // values must be given as coordinates
+    @SuppressWarnings("Duplicates")
+    private boolean drawPlayerTile(TileColors color, int x, int y) {
         try {
             if (x <= 10 && y <= 10) {
-                JLabel img_bg = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
-                img_bg.setBounds(x * 45, y * 45, 45, 45);
-                playerPanel.add(img_bg);
-                playerPanel.repaint(); // Updates the image so the boxes appear
+                JLabel img = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
+                img.setBounds(x * 45, y * 45, 45, 45);
+                playerBoardPanel.add(img);
                 return true;
             }
         }
         catch(IOException e) {
-            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR);
+            //TODO Consider removing the exit here? Throw the exception up the chain?
+            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
         }
         return false;
     }
 
-    public boolean drawCPUTile(TileColors color, int x, int y) {
-        // values must be given as coordinates
+    /*
+     * Adds a square to the board grid at the point given
+     *
+     * values must be given as coordinates
+     * values are 1-indexed
+     */
+    @SuppressWarnings("Duplicates")
+    private boolean drawCPUTile(TileColors color, int x, int y) {
         try {
             if (x <= 10 && y <= 10) {
-                JLabel img_bg = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
-                img_bg.setBounds(x * 45, y * 45, 45, 45);
-                cpuPanel.add(img_bg);
-                cpuPanel.repaint(); // Updates the image so the boxes appear
+                JLabel img = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
+                img.setBounds(x * 45, y * 45, 45, 45);
+                playerBoardPanel.setComponentZOrder(img, 0);
                 return true;
             }
         }
         catch(IOException e) {
-            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR);
+            //TODO Consider removing the exit here? Throw the exception up the chain?
+            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR_MESSAGE);
             System.exit(1);
-        }
-        return false;
-    }
-
-    // find if the ship will be off the board
-    public boolean validPlace(Ship ship, int x, int y) {
-        if(ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
-            if(y <= ((boardWidth + 1) - ship.getSize())) {
-                return true;
-            }
-        }
-        else {
-            if(ship.getDirectionOfShip().equals(Ship.Direction.Horizontal)) {
-                if(x <= ((boardWidth + 1) - ship.getSize())) {
-                    return true;
-                }
-            }
         }
         return false;
     }
@@ -309,16 +284,14 @@ public class MainGUI {
             Ship selectedShip = new Ship(shipList.getSelectedValue(), directionList.getSelectedValue());
 
             if (x >= 1 && y >= 1) {
-                //if(freeBoard(player, selectedShip, x, y) && validPlace(selectedShip, x, y)){
-                if(validPlace(selectedShip, x, y)){
-                    player.addShip(selectedShip, x, y);
+                // the addShip Function performs all of the necessary board checks itself
+                if(player.addShip(selectedShip, x, y)){
                     redrawBoard(player);
                 }
                 if (player.allShipsPlaced()) {
                     doneButton.setEnabled(true);
                 }
             }
-
         }
 
         public void mouseEntered(MouseEvent arg0) {}
