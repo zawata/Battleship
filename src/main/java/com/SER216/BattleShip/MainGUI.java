@@ -49,7 +49,7 @@ public class MainGUI {
     public enum TileColors {
         Blank(0, null),       // Nothing
         Green(1, file_green), // Ship
-        Blue (2, file_blue ), //
+        Blue (2, file_blue ), // ??
         Red  (3, file_red  ), // Hit
         Grey (4, file_grey ), // Miss
         Black(5, file_black); // Sunk
@@ -197,9 +197,12 @@ public class MainGUI {
         playerBoardPanel.removeMouseListener(boardListener);
 
         placeFrame.repaint();
+
+        cpu.placeShips();
+        player1_turn = true;
     }
 
-    public boolean redrawBoard(Player player, JPanel panel) {
+    public boolean redrawBoard(Player player, JPanel panel, JLabel board) {
         panel.removeAll();
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
@@ -215,7 +218,7 @@ public class MainGUI {
 
         // placing the board after the tiles means it will have a higher Z-index
         // thus it will be drawn first.
-        panel.add(playerBoard);
+        panel.add(board);
         panel.repaint();
         return true;
     }
@@ -257,7 +260,7 @@ public class MainGUI {
             if (x >= 1 && y >= 1) {
                 // the addShip Function performs all of the necessary board checks itself
                 if(player.addShip(selectedShip, x, y)){
-                    redrawBoard(player, playerBoardPanel);
+                    redrawBoard(player, playerBoardPanel, playerBoard);
                 }
                 if (player.allShipsPlaced()) {
                     doneButton.setEnabled(true);
@@ -277,14 +280,14 @@ public class MainGUI {
             int x = Util.getGrid(e.getX());
             int y = Util.getGrid(e.getY());
 
-            if (x >= 1 && y >= 1 && player1_turn) {
-                if (player.validShot(x, y)) {
-                    player1_turn = false;
-                    //if (!checkWin()) {
-                    //    while (!opponent.cpuFire()
-                    //        checkWin();
-                    //}
+            if (x >= 1 && y >= 1) {
+                if(player1_turn) {
+                    if (player.validShot(x, y)) {
+                    }
                 }
+                //cpu.placeShips();
+                redrawBoard(player, playerBoardPanel, playerBoard);
+                redrawBoard(cpu, cpuBoardPanel, cpuBoard);
             }
         }
 

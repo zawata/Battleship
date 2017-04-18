@@ -108,46 +108,18 @@ public class Ship {
         }
     }
 
-    public ShipType getShipType() {
-        return typeofShip;
-    }
-    public void setShipType(ShipType name) {
-        this.typeofShip = name;
-    }
+    public ShipType getShipType() { return typeofShip; }
+    public Direction getDirectionOfShip() { return directionOfShip; }
 
-    public Direction getDirectionOfShip() {
-        return directionOfShip;
-    }
-    public void setDirectionOfShip(Direction directionOfShip) {
-        this.directionOfShip = directionOfShip;
-    }
+    public int getX() { return x; }
+    public int getY() { return y; }
 
-    public int getX() {
-        return x;
-    }
+    public int getSize() { return typeofShip.getSize(); }
 
-    public int getY() {
-        return y;
-    }
+    public int getHits() { return hits; }
+    public void hit() { this.hits++; }
 
-    public int getSize() {
-        return typeofShip.getSize();
-    }
-
-    public int getHits() {
-        return hits;
-    }
-    public void setHits(int hits) {
-        this.hits = hits;
-    }
-
-    public void addHits() {
-        this.hits++;
-    }
-
-    public boolean isPlaced() {
-        return placed;
-    }
+    public boolean isPlaced() { return placed; }
 
     public void place(int X, int Y) {
         this.x = X;
@@ -159,6 +131,25 @@ public class Ship {
         this.x = 0;
         this.y = 0;
         this.placed = false;
+    }
+
+    public boolean Occupies(int x, int y) {
+        if (this.directionOfShip.equals("Vertical")) {
+            if (this.x == x) {
+                if (this.y <= y && y <= (this.y + this.getSize())) {
+                    return true;
+                }
+            }
+        } else {
+            if (this.directionOfShip.equals("Horizontal")) {
+                if (this.y == y) {
+                    if (this.x <= x && x <= (this.x + this.getSize())) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     @Override
