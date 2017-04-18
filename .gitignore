@@ -26,3 +26,6 @@ hs_err_pid*
 #
 
 out/*
+workspace.xml
+tasks.xml
+*.iws
