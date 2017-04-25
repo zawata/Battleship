@@ -20,13 +20,13 @@ public class Human extends Player {
             if (ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
                 if (y <= ((boardWidth + 1) - ship.getSize())) {
                     for (int i = 0; i < ship.getSize(); i++) {
-                        if(getBoardValue(x, (i + y)) != MainGUI.TileColors.Blank.getValue())
+                        if(getShipBoardValue(x, (i + y)) != MainGUI.TileColors.Blank.getValue())
                             return false;
                     }
                     ship.place(x, y);
                     addShip(ship);
                     for (int i = 0; i < ship.getSize(); i++) {
-                        setBoardValue(x, (i + y), MainGUI.TileColors.Green.getValue());
+                        setShipBoardValue(x, (i + y), MainGUI.TileColors.Green.getValue());
                     }
                     return true;
                 }
@@ -34,13 +34,13 @@ public class Human extends Player {
                 if (ship.getDirectionOfShip().equals(Ship.Direction.Horizontal)) {
                     if (x <= ((boardWidth + 1) - ship.getSize())) {
                         for (int i = 0; i < ship.getSize(); i++) {
-                            if(getBoardValue((i + x), y) != MainGUI.TileColors.Blank.getValue())
+                            if(getShipBoardValue((i + x), y) != MainGUI.TileColors.Blank.getValue())
                                 return false;
                         }
                         ship.place(x, y);
                         addShip(ship);
                         for (int i = 0; i < ship.getSize(); i++) {
-                            setBoardValue((i + x), y, MainGUI.TileColors.Green.getValue());
+                            setShipBoardValue((i + x), y, MainGUI.TileColors.Green.getValue());
                         }
                         return true;
                     }
@@ -62,7 +62,7 @@ public class Human extends Player {
             if (oldShip.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
                 shipFleet.remove(oldShip);
                 for (int i = 0; i < oldShip.getSize(); i++) {
-                    setBoardValue(oldShip.getX(), (i + oldShip.getY()), MainGUI.TileColors.Blank.getValue());
+                    setShipBoardValue(oldShip.getX(), (i + oldShip.getY()), MainGUI.TileColors.Blank.getValue());
                 }
                 oldShip.remove();
                 return true;
@@ -70,7 +70,7 @@ public class Human extends Player {
                 if (oldShip.getDirectionOfShip().equals(Ship.Direction.Horizontal)) {
                     shipFleet.remove(oldShip);
                     for (int i = 0; i < oldShip.getSize(); i++) {
-                        setBoardValue((i + oldShip.getX()), oldShip.getY(), MainGUI.TileColors.Blank.getValue());
+                        setShipBoardValue((i + oldShip.getX()), oldShip.getY(), MainGUI.TileColors.Blank.getValue());
                     }
                     oldShip.remove();
                     return true;
@@ -81,7 +81,7 @@ public class Human extends Player {
     }
 
     public boolean validShot(int x, int y) {
-        if(getBoardValue(x, y) == 0) {
+        if(getShipBoardValue(x, y) == 0) {
             return true;
         }
         else {
@@ -93,7 +93,5 @@ public class Human extends Player {
         return false;
     }
 
-    public void turn() {
-
-    }
+    public void turn() {}
 }

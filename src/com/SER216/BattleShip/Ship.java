@@ -117,9 +117,10 @@ public class Ship {
     public int getSize() { return typeofShip.getSize(); }
 
     public int getHits() { return hits; }
-    public void hit() { this.hits++; }
+    public void hit() { if (this.hits < this.getSize()) this.hits++; }
 
     public boolean isPlaced() { return placed; }
+    public boolean isSunk() { return (this.hits == this.getSize()); }
 
     public void place(int X, int Y) {
         this.x = X;

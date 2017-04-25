@@ -3,25 +3,33 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package battleship;
+package com.SER216.Battleship;
 
-import java.io.IOException;
-import org.databene.contiperf.PerfTest;
+import com.SER216.BattleShip.CPU;
 import org.databene.contiperf.junit.ContiPerfRule;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import org.junit.Rule;
+
+import static org.junit.Assert.*;
+
 import org.mockito.Mock;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import com.SER216.BattleShip.Human;
+import com.SER216.BattleShip.Ship;
 
 /**
  *
@@ -33,12 +41,12 @@ public class PlayerTest {
     @Rule
     public ContiPerfRule CPRule = new ContiPerfRule();
     @Mock
-    private Player.Ship ship = mock(Player.Ship.class);
+    private Ship ship = mock(Ship.class);
     
-    private Player instance;
+    private Human instance;
      
-    public PlayerTest() throws IOException{
-        this.instance = new Player("Player");
+    public PlayerTest() throws IOException {
+        this.instance = new Human();
         MockitoAnnotations.initMocks(this);
         
 
@@ -59,11 +67,9 @@ public class PlayerTest {
      * @throws java.lang.Exception
      */
     @Test
-    //@PerfTest(invocations = 10, threads = 1)
-    public void testIsRange() throws Exception {   
+    public void testPlayerPlacement() throws Exception {
         System.out.println("isRange");
-        boolean expResult = true;
-        Player.Ship ship2 = mock(Player.Ship.class);
+        Ship ship2 = mock(Ship.class);
         ship.size = 2;
         ship2.size = 5;
         
@@ -73,10 +79,28 @@ public class PlayerTest {
         when(ship2.getDirectionOfShip()).thenReturn("Horizontal");
         when(ship2.getX()).thenReturn(4);
         
-        assertEquals(expResult, instance.isRange(ship, 0, 5));
+        assertEquals(true, instance.isRange(ship, 0, 5));
         verify(ship, times(1)).getDirectionOfShip();
         
-        assertEquals(expResult, instance.isRange(ship2, 4, 0));
+        assertEquals(true, instance.isRange(ship2, 4, 0));
+        verify(ship2, times(2)).getDirectionOfShip();
+    }
+
+    @Test
+    public void testCPUPlacement() throws Exception {
+        System.out.println("CPUPlacement");
+        CPU cpu = mock(CPU.class);
+
+        when(ship.getDirectionOfShip()).thenReturn("Vertical");
+        when(ship.getY()).thenReturn(5);
+
+        when(ship2.getDirectionOfShip()).thenReturn("Horizontal");
+        when(ship2.getX()).thenReturn(4);
+
+        assertEquals(true, instance.isRange(ship, 0, 5));
+        verify(ship, times(1)).getDirectionOfShip();
+
+        assertEquals(true, instance.isRange(ship2, 4, 0));
         verify(ship2, times(2)).getDirectionOfShip();
     }
     

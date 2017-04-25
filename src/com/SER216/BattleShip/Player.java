@@ -10,7 +10,8 @@ import static com.SER216.BattleShip.Util.boardWidth;
  */
 public class Player {
 
-    protected int[][] board = new int[boardWidth][boardWidth];
+    protected int[][] shipBoard = new int[boardWidth][boardWidth];
+    protected int[][] shotBoard = new int[boardWidth][boardWidth];
 
     //crude implementation of fixed Length Set
     protected List<Ship> shipFleet = new ArrayList<>();
@@ -24,7 +25,8 @@ public class Player {
     protected Player() {
         for(int i = 0; i < boardWidth; i++) {
             for(int j = 0; j < boardWidth; j++) {
-                board[i][j] = MainGUI.TileColors.Blank.getValue();
+                shipBoard[i][j] = MainGUI.TileColors.Blank.getValue();
+                shotBoard[i][j] = MainGUI.TileColors.Blank.getValue();
             }
         }
     }
@@ -49,33 +51,43 @@ public class Player {
 
     /**
      * Values passed are 1-indexed
+     *
+     * @return
+     * -1 for error
+     * 0 for miss
+     * 1 for hit
+     * 2 for sunk
      */
-    protected boolean recieveShot(int x, int y) {
-        if(getBoardValue(x, y) == MainGUI.TileColors.Blank.getValue()) {
+    protected int receiveShot(int x, int y) {
+        if(getShipBoardValue(x, y) == MainGUI.TileColors.Blank.getValue()) {
             //empty cell
-            setBoardValue(x, y, MainGUI.TileColors.Grey.getValue());
-            return true;
-        } else if(getBoardValue(x, y) == MainGUI.TileColors.Green.getValue()) {
+            setShipBoardValue(x, y, MainGUI.TileColors.Grey.getValue());
+            return 0;
+        } else if(getShipBoardValue(x, y) == MainGUI.TileColors.Green.getValue()) {
             //Ship
-            setBoardValue(x, y, MainGUI.TileColors.Red.getValue());
+            setShipBoardValue(x, y, MainGUI.TileColors.Red.getValue());
             for(Ship ship : shipFleet) {
                 if (ship.Occupies(x, y)) {
                     ship.hit();
+                    if(ship.isSunk())
+                        return 2;
                 }
             }
-            return true;
+            return 1;
         } else {
-            return false;
+            return -1;
         }
     }
 
     /**
      * Values passed are 1-indexed
      */
-    protected int getBoardValue(int x, int y) { return board[x-1][y-1]; }
+    protected int getShipBoardValue(int x, int y) { return shipBoard[x-1][y-1]; }
+    protected int getShotBoardValue(int x, int y) { return shipBoard[x-1][y-1]; }
 
     /**
      * Values passed are 1-indexed
      */
-    protected void setBoardValue(int x, int y, int value) { board[x-1][y-1] = value; }
+    protected void setShipBoardValue(int x, int y, int value) { shipBoard[x-1][y-1] = value; }
+    protected void setShotBoardValue(int x, int y, int value) { shipBoard[x-1][y-1] = value; }
 }

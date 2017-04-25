@@ -20,8 +20,9 @@
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
-            <artifactId>mockito-all</artifactId>
-            <version>2.0.2-beta</version>
+            <artifactId>mockito-android</artifactId>
+            <version>2.7.22</version>
+            <type>pom</type>
             <scope>test</scope>
         </dependency>
         <dependency>
