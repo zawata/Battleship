@@ -5,36 +5,92 @@ import com.SER216.Random.RandomWrapper;
 
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Random;
 import java.util.Stack;
 
 import static com.SER216.BattleShip.Util.boardWidth;
+import static com.SER216.BattleShip.Util.reverse;
 
 /**
  * Created by zawata on 4/12/2017.
  */
 public class CPU extends Player {
-    private IRandomWrapper rand = new RandomWrapper();
+    private Random rand = new Random();
 
-    private String name;
-
-    // CPU AI values
-    private final boolean[] cpuCompass = new boolean[4];
-    private int orientation = 0;
-    private boolean hunting = false;
-    private String lastShip = "";
-    private int nextShip = 0;
-    private int cpuStartHit_x;
-    private int cpuStartHit_y;
-    private int cpuLastHit_x;
-    private int cpuLastHit_y;
-
-    public CPU() {
-        super();
+    public CPU(String name) {
+        super(name);
+        rand.setSeed(0);
     }
 
-    public void setRandomWrapper(IRandomWrapper random) {
-        this.rand = random;
+    private enum Direction {
+        Up(0, -1),
+        Right(1, 0),
+        Down(0, 1),
+        Left(-1, 0);
+
+        private final int Xvalue;
+        private final int Yvalue;
+
+        Direction(final int Xvalue, final int Yvalue) {
+            this.Xvalue = Xvalue;
+            this.Yvalue = Yvalue;
+        }
+
+        public int getXvalue() {
+            return Xvalue;
+        }
+
+        public int getYvalue() {
+            return Yvalue;
+        }
+
+        @SuppressWarnings("Duplicates")
+        public Direction getCW() {
+            switch (this) {
+                case Up:
+                    return Right;
+                case Right:
+                    return Down;
+                case Down:
+                    return Left;
+                case Left:
+                    return Up;
+                default:
+                    return this;
+            }
+        }
+
+        @SuppressWarnings("Duplicates")
+        public Direction getCCW() {
+            switch (this) {
+                case Up:
+                    return Left;
+                case Right:
+                    return Up;
+                case Down:
+                    return Right;
+                case Left:
+                    return Down;
+                default:
+                    return this;
+            }
+        }
+
+        @SuppressWarnings("Duplicates")
+        public Direction getOpposite() {
+            switch (this) {
+                case Up:
+                    return Down;
+                case Right:
+                    return Left;
+                case Down:
+                    return Up;
+                case Left:
+                    return Right;
+                default:
+                    return this;
+            }
+        }
     }
 
     @SuppressWarnings("Duplicates")
@@ -45,7 +101,6 @@ public class CPU extends Player {
         Ship ship;
 
         for (Ship.ShipType shiptype : Ship.ShipType.values()) {
-
             //attempt to add a ship until it succeeds
             while (true) {
                 direction = rand.nextInt(2);
@@ -53,299 +108,290 @@ public class CPU extends Player {
                 if (direction == Ship.Direction.Vertical.getValue()) {
                     x = rand.nextInt(boardWidth) + 1;
                     y = rand.nextInt(boardWidth - shiptype.getSize()) + 1;
-
                     ship = new Ship(shiptype, Ship.Direction.Vertical);
 
-                    //if the ship intersect with another then start over
+                    //if the ship intersects with another then start over
+                    boolean valid = true;
                     for (int i = 0; i < ship.getSize(); i++) {
-                        if (getBoardValue(x, (i + y)) != MainGUI.TileColors.Blank.getValue())
-                            continue;
+                        if (getShipBoardValue(x, (i + y)) != MainGUI.TileColors.Blank.getValue())
+                            valid = false;
                     }
-
-                    //place ship if things are good
-                    ship.place(x, y);
-                    addShip(ship);
-                    for (int i = 0; i < ship.getSize(); i++) {
-                        setBoardValue(x, (i + y), MainGUI.TileColors.Green.getValue());
-                    }
-                    break;
-                } else {
-                    if (direction == Ship.Direction.Horizontal.getValue()) {
-                        x = rand.nextInt(boardWidth - shiptype.getSize()) + 1;
-                        y = rand.nextInt(boardWidth) + 1;
-
-                        ship = new Ship(shiptype, Ship.Direction.Horizontal);
-
-                        //if the ship intersect with another then start over
-                        for (int i = 0; i < ship.getSize(); i++) {
-                            if (getBoardValue((i + x), y) != MainGUI.TileColors.Blank.getValue())
-                                continue;
-                        }
-
+                    if (valid) {
                         //place ship if things are good
                         ship.place(x, y);
                         addShip(ship);
                         for (int i = 0; i < ship.getSize(); i++) {
-                            setBoardValue((i + x), y, MainGUI.TileColors.Green.getValue());
+                            setShipBoardValue(x, (i + y), MainGUI.TileColors.Green.getValue());
                         }
                         break;
                     }
+                } else {
+                    if (direction == Ship.Direction.Horizontal.getValue()) {
+                        x = rand.nextInt(boardWidth - shiptype.getSize()) + 1;
+                        y = rand.nextInt(boardWidth) + 1;
+                        ship = new Ship(shiptype, Ship.Direction.Horizontal);
+
+                        //if the ship intersects with another then start over
+                        boolean valid = true;
+                        for (int i = 0; i < ship.getSize(); i++) {
+                            if (getShipBoardValue((i + x), y) != MainGUI.TileColors.Blank.getValue())
+                                valid = false;
+                        }
+                        if (valid) {
+                            //place ship if things are good
+                            ship.place(x, y);
+                            addShip(ship);
+                            for (int i = 0; i < ship.getSize(); i++) {
+                                setShipBoardValue((i + x), y, MainGUI.TileColors.Green.getValue());
+                            }
+                            break;
+                        }
+                    }
                 }
             }
         }
     }
 
-    //TODO Need to look here at AI's
-    private List<int[]> hits = new Stack<>();
-    private boolean hunting = false;
+    private Stack<hitStackElem> hitStack = new Stack<>();
+    private boolean reversed = false;
+    private boolean shotSet = false;
 
-    public boolean fire(Player player) throws IOException {
-        int x = 0, y = 0;
-        while(true) {
-            if(getShotBoardValue(x, y) == ) {
+    @SuppressWarnings("Duplicates")
+    public boolean fire(Player opponent) throws IOException {
+        int x, y, retVal;
 
-            }
+        x = (rand.nextInt(boardWidth) + 1);
+        y = (rand.nextInt(boardWidth) + 1);
+
+        while (!(MainGUI.getColorByValue(getShotBoardValue(x, y)).equals(MainGUI.TileColors.Blank))) {
+            x = (rand.nextInt(boardWidth) + 1);
+            y = (rand.nextInt(boardWidth) + 1);
         }
-        x = (rand.nextInt(boardWidth + 1) + 1);
-        y = (rand.nextInt(boardWidth + 1) + 1);
-        if(!hunting) {
-            if(player.receiveShot(x,y) == 0) {
-                setBoardValue(x,y,MainGUI.TileColors.Grey.getValue());
-                return false;
-            } else if(player.receiveShot(x,y) == 1) {
-                setBoardValue(x,y,MainGUI.TileColors.Red.getValue());
-                hunting = true;
-                return true;
-            } else if(player.receiveShot(x,y) == -1) {
-                //keep trying until we hit.
-                // as long as hunting stays false then we're good
-                return(fire(player));
-            }
-        } else{
-            //now the fun begins
 
+        if (hitStack.size() == 0) {
+            System.out.println("no hits");
+            retVal = opponent.receiveShot(x, y);
+            switch (retVal) {
+                case 0: //miss
+                    System.out.println("Random miss");
+                    this.setShotBoardValue(x, y, MainGUI.TileColors.Grey.getValue());
+                    return true;
+                case 1: //hit
+                    System.out.println("Random hit");
+                    setShotBoardValue(x, y, MainGUI.TileColors.Red.getValue());
+                    hitStack.push(new hitStackElem(
+                            x,
+                            y,
+                            x + Direction.Up.getXvalue(),
+                            y + Direction.Up.getYvalue(),
+                            Direction.Up));
+                    return true;
+                default:
+                    throw new IOException("Unhandled ReceiveShot Number: " + retVal);
+            }
+        } else {
+            System.out.println("hitStack size: " + hitStack.size());
+            int newShotX = 0;
+            int newShotY = 0;
+
+            for (int i = 0; i <= 4 && !shotSet; i++) {
+                if (i == 4) {
+                    if (hitStack.size() > 1) {
+                        Direction old_direction = hitStack.peek().direction;
+                        hitStackElem origin_elem = hitStack.elementAt(0);
+                        for (Object elem : reverse(hitStack)) {
+                            hitStackElem HTElem = (hitStackElem) elem;
+                            if (old_direction.equals(HTElem.direction)) {
+                                origin_elem = HTElem;
+                            } else {
+                                break;
+                            }
+                        }
+                        hitStackElem top = hitStack.pop();
+                        origin_elem.reverse();
+                        top.NextX = origin_elem.CurrX + origin_elem.direction.getXvalue();
+                        top.NextY = origin_elem.CurrY + origin_elem.direction.getYvalue();
+                        top.direction = origin_elem.direction;
+                        hitStack.push(top);
+                        break;
+                    } else {
+                        throw new IOException("Size one ship?");
+                    }
+                }
+                hitStackElem calcNext = new hitStackElem(hitStack.peek());
+                calcNext.CurrX = hitStack.peek().CurrX + hitStack.peek().direction.getXvalue();
+                calcNext.CurrY = hitStack.peek().CurrY + hitStack.peek().direction.getYvalue();
+                if (calcNext.CurrX != hitStack.peek().NextX || calcNext.CurrY != hitStack.peek().NextY) {
+                    newShotX = hitStack.peek().NextX;
+                    newShotY = hitStack.peek().NextY;
+                    break;
+                } else {
+                    newShotX = calcNext.CurrX;
+                    newShotY = calcNext.CurrY;
+                    for (int j = 0; j <= 4; j++) {
+                        if (j == 4) {
+                            if (hitStack.size() > 1) {
+                                Direction old_direction = hitStack.peek().direction;
+                                hitStackElem origin_elem = hitStack.elementAt(0);
+                                for (Object elem : reverse(hitStack)) {
+                                    hitStackElem HTElem = (hitStackElem) elem;
+                                    if (old_direction.equals(HTElem.direction)) {
+                                        origin_elem = HTElem;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                hitStackElem top = hitStack.pop();
+                                origin_elem.reverse();
+                                top.NextX = origin_elem.CurrX + origin_elem.direction.getXvalue();
+                                top.NextY = origin_elem.CurrY + origin_elem.direction.getYvalue();
+                                top.direction = origin_elem.direction;
+                                hitStack.push(top);
+                                break;
+                            } else {
+                                throw new IOException("Size one ship?");
+                            }
+                        }
+                        newShotX = hitStack.peek().CurrX + hitStack.peek().direction.getXvalue();
+                        newShotY = hitStack.peek().CurrY + hitStack.peek().direction.getYvalue();
+                        System.out.println("boundsCheck: " + (checkBounds(newShotX) & checkBounds(newShotY)));
+                        //System.out.println("tileCheck: " + (MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank)));
+                        if (!(checkBounds(newShotX) & checkBounds(newShotY)) ||
+                                !(MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank))) {
+                            hitStackElem temp = hitStack.pop();
+                            temp.turnRight();
+                            hitStack.push(temp);
+                        }
+                        else {
+                            shotSet = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            shotSet = false;
+            retVal = opponent.receiveShot(newShotX, newShotY);
+            switch (retVal) {
+                case 0: //miss
+                    this.setShotBoardValue(newShotX, newShotY, MainGUI.TileColors.Grey.getValue());
+                    if (hitStack.size() > 1 && !reversed) {
+                        Direction old_direction = hitStack.peek().direction;
+                        hitStackElem origin_elem = hitStack.elementAt(0);
+                        for (Object elem : reverse(hitStack)) {
+                            hitStackElem HTElem = (hitStackElem) elem;
+                            if (old_direction.equals(HTElem.direction)) {
+                                origin_elem = HTElem;
+                            } else {
+                                break;
+                            }
+                        }
+                        hitStackElem top = hitStack.pop();
+                        origin_elem.reverse();
+                        top.NextX = origin_elem.CurrX + origin_elem.direction.getXvalue();
+                        top.NextY = origin_elem.CurrY + origin_elem.direction.getYvalue();
+                        top.direction = origin_elem.direction;
+                        hitStack.push(top);
+                        reversed = true;
+                    } else {
+                        reversed = false;
+                        hitStackElem temp = hitStack.pop();
+                        temp.turnRight();
+                        hitStack.push(temp);
+                    }
+                    return true;
+                case 1: //hit
+                    setShotBoardValue(newShotX, newShotY, MainGUI.TileColors.Red.getValue());
+                    hitStack.push(new hitStackElem(
+                            newShotX,
+                            newShotY,
+                            newShotX + hitStack.peek().direction.getXvalue(),
+                            newShotY + hitStack.peek().direction.getYvalue(),
+                            hitStack.peek().direction));
+                    return true;
+                case 2: //sunk Patrol Boat
+                case 3: //sunk Submarine or Destroyer
+                case 4: //sunk Battleship
+                case 5: //sunk Carrier
+                    System.out.print("Sunk size:" + retVal);
+                    setShotBoardValue(newShotX, newShotY, MainGUI.TileColors.Red.getValue()); //if its not displaying then we don't need to mark it black
+
+                    // the number of values on the stack is one less than the size
+                    // as the last hit is a sunk and doesn't get put on the stack
+                    for(int i = 0; i < retVal - 1; i++) {
+                        hitStack.pop();
+                    }
+                    if(hitStack.size() != 0) {
+                        hitStackElem temp = hitStack.pop();
+                        temp.turnRight();
+                        temp.NextX = temp.CurrX + temp.direction.getXvalue();
+                        temp.NextY = temp.CurrY + temp.direction.getYvalue();
+                        hitStack.push(temp);
+                    }
+                    return true;
+                default:
+                    throw new IOException("Unhandled ReceiveShot Number: " + retVal);
+            }
         }
     }
-    public boolean fire() throws IOException {
-        // Finds a random number in the range
-        int x = rand.nextInt(10);
-        int y = rand.nextInt(10);
-
-        if (!x_Hits.isEmpty() && !y_Hits.isEmpty() && !hunting) {
-            cpuStartHit_x = x_Hits.remove();
-            cpuStartHit_y = y_Hits.remove();
-            hunting = true;
-        }
-
-        // If the last shot was a miss then the current shot is fired randomly
-        else if (getBoardValue(x + 1, y + 1) == 0 && !hunting && nextShip == 0) {
-            // If the shot is a hit then it sets the next shot to be searching
-            if (cpuTakeShot(x, y)) {
-                cpuStartHit_x = x;
-                cpuStartHit_y = y;
-                sameShip(x, y);
-                lostShip = lastShip;
-                hunting = true;
-            }
-            return true;
-        } else if (hunting) {
-            // Finding the direction of the ship starting with up and going clockwise
-            if (orientation <= 0) {
-                for (int i = 0; i < cpuCompass.length; i++) {
-                    if (!cpuCompass[i]) {
-                        cpuCompass[i] = true;
-
-                        if (i == 0) {
-                            if (cpuStartHit_y - 1 > -1 && gameBoard[cpuStartHit_x][cpuStartHit_y - 1] == 0) {
-                                //checks to see if the shot is on the board and not already shot
-                                if (cpuTakeShot(cpuStartHit_x,
-                                        cpuStartHit_y - 1)) {
-                                    // If the shot is on the same ship the direction is found
-                                    if (sameShip(cpuStartHit_x,
-                                            cpuStartHit_y - 1)) {
-                                        orientation = 1;
-                                        cpuLastHit_x = cpuStartHit_x;
-                                        cpuLastHit_y = cpuStartHit_y - 1;
-                                    } else {
-                                        orientation = 1;
-                                        cpuCompass[i] = false;
-                                        x_Hits.add(cpuLastHit_x);
-                                        y_Hits.add(cpuLastHit_y);
-                                    }
-                                }
-                                return true;
-                            }
-
-                        } else if (i == 1) {
-                            if (cpuStartHit_x + 1 < 10 && gameBoard[cpuStartHit_x + 1][cpuStartHit_y] == 0) {
-                                if (cpuTakeShot(cpuStartHit_x + 1, cpuStartHit_y)) {
-                                    if (sameShip(cpuStartHit_x + 1, cpuStartHit_y)) {
-                                        orientation = 2;
-                                        cpuLastHit_x = cpuStartHit_x + 1;
-                                        cpuLastHit_y = cpuStartHit_y;
-                                    } else {
-                                        orientation = 2;
-                                        cpuCompass[i] = false;
-                                        x_Hits.add(cpuLastHit_x);
-                                        y_Hits.add(cpuLastHit_y);
-                                    }
-                                }
-                                return true;
-
-                            }
-
-                        } else if (i == 2) {
-                            if (cpuStartHit_y + 1 < 10
-                                    && gameBoard[cpuStartHit_x][cpuStartHit_y + 1] == 0) {
-                                if (cpuTakeShot(cpuStartHit_x, cpuStartHit_y + 1)) {
-                                    if (sameShip(cpuStartHit_x, cpuStartHit_y + 1)) {
-                                        orientation = 3;
-                                        cpuLastHit_x = cpuStartHit_x;
-                                        cpuLastHit_y = cpuStartHit_y + 1;
-                                    } else {
-                                        cpuCompass[i] = false;
-                                        x_Hits.add(cpuLastHit_x);
-                                        y_Hits.add(cpuLastHit_y);
-                                        orientation = 3;
-                                    }
-                                }
-                                return true;
-                            }
-                        } else if (i == 3) {
-                            if (cpuStartHit_x - 1 > -1 && gameBoard[cpuStartHit_x - 1][cpuStartHit_y] == 0) {
-                                if (cpuTakeShot(cpuStartHit_x - 1, cpuStartHit_y)) {
-                                    if (sameShip(cpuStartHit_x - 1, cpuStartHit_y)) {
-                                        orientation = 4;
-                                        cpuLastHit_x = cpuStartHit_x - 1;
-                                        cpuLastHit_y = cpuStartHit_y;
-                                    } else {
-                                        orientation = 4;
-                                        cpuCompass[i] = false;
-                                        x_Hits.add(cpuLastHit_x);
-                                        y_Hits.add(cpuLastHit_y);
-                                    }
-                                }
-                                return true;
-                            }
-                        }
-                    }
-
-                }
-
-
-            } else if (orientation > 0) {
-                // When the direction of the ship is known The boat shot until it sinks
-                if (orientation == 1) {
-                    if (cpuLastHit_y - 1 > -1 && gameBoard[cpuLastHit_x][cpuLastHit_y - 1] == 0) {
-                        if (cpuTakeShot(cpuLastHit_x, cpuLastHit_y - 1)) {
-                            if (sameShip(cpuLastHit_x, cpuLastHit_y - 1)) {
-                                cpuLastHit_y = cpuLastHit_y - 1;
-                                return true;
-                            } else {
-                                x_Hits.add(cpuLastHit_x);
-                                y_Hits.add(cpuLastHit_y - 1);
-                                cpuLastHit_y = cpuLastHit_y - 1;
-                                return true;
-                            }
-
-                        } else { // If the shot was a miss or off the board the direction is changed
-                            orientation = 3;
-                            cpuLastHit_y = cpuStartHit_y;
-                            return true;
-                        }
-                    } else {
-                        orientation = 3;
-                        cpuLastHit_y = cpuStartHit_y;
-                        return false;
-                    }
-                } else if (orientation == 2) {
-                    if (cpuLastHit_x + 1 < 10 && gameBoard[cpuLastHit_x + 1][cpuLastHit_y] == 0) {
-                        if (cpuTakeShot(cpuLastHit_x + 1, cpuLastHit_y)) {
-                            if (sameShip(cpuLastHit_x + 1, cpuLastHit_y)) {
-                                cpuLastHit_x = cpuLastHit_x + 1;
-                                cpuLastHit_y = cpuLastHit_y;
-                                return true;
-                            } else {
-                                x_Hits.add(cpuLastHit_x + 1);
-                                y_Hits.add(cpuLastHit_y);
-                                cpuLastHit_x = cpuLastHit_x + 1;
-                                return true;
-                            }
-
-                        } else {
-                            orientation = 4;
-                            cpuLastHit_x = cpuStartHit_x;
-                            return true;
-                        }
-                    } else {
-                        orientation = 4;
-                        cpuLastHit_x = cpuStartHit_x;
-                        return false;
-                    }
-                } else if (orientation == 3) {
-                    if (cpuLastHit_y + 1 < 10 && gameBoard[cpuLastHit_x][cpuLastHit_y + 1] == 0) {
-                        if (cpuTakeShot(cpuLastHit_x, cpuLastHit_y + 1)) {
-                            if (sameShip(cpuLastHit_x, cpuLastHit_y + 1)) {
-                                cpuLastHit_x = cpuLastHit_x;
-                                cpuLastHit_y = cpuLastHit_y + 1;
-                                return true;
-                            } else {
-                                x_Hits.add(cpuLastHit_x);
-                                y_Hits.add(cpuLastHit_y + 1);
-                                cpuLastHit_y = cpuLastHit_y + 1;
-                                return true;
-                            }
-
-
-                        } else {
-                            orientation = 1;
-                            cpuLastHit_y = cpuStartHit_y;
-                            return true;
-                        }
-                    } else {
-                        orientation = 1;
-                        cpuLastHit_y = cpuStartHit_y;
-                        return false;
-                    }
-                } else if (orientation == 4) {
-                    if (cpuLastHit_x - 1 > -1 && gameBoard[cpuLastHit_x - 1][cpuLastHit_y] == 0) {
-                        if (cpuTakeShot(cpuLastHit_x - 1, cpuLastHit_y)) {
-                            if (sameShip(cpuLastHit_x - 1, cpuLastHit_y)) {
-                                cpuLastHit_x = cpuLastHit_x - 1;
-                                cpuLastHit_y = cpuLastHit_y;
-                                return true;
-                            } else {
-                                x_Hits.add(cpuLastHit_x - 1);
-                                y_Hits.add(cpuLastHit_y);
-                                cpuLastHit_x = cpuLastHit_x - 1;
-                                return true;
-                            }
-                        } else {
-                            orientation = 2;
-                            cpuLastHit_x = cpuStartHit_x;
-                            return true;
-                        }
-                    } else {
-                        orientation = 2;
-                        cpuLastHit_x = cpuStartHit_x;
-                        return false;
-                    }
-                }
-                return false;
-            }
-        }
-        return false;
+    private boolean checkBounds(int i) {
+        return (i > 0) && (i <= boardWidth);
     }
 
     //used purely in this class
     //basically just a C Struct in Java;
-    private class hitType {
-        //since its just a small private type I'm not following
-        // object oriented principals
-        public int x;
-        public int y;
-        public int type;
+    private class hitStackElem {
 
-        public hitType(int x, int y, )
+        //since its just a small private type I'm not following
+        // object oriented principals and making everything public
+        public int CurrX;
+        public int CurrY;
+
+        public int NextX;
+        public int NextY;
+        public Direction direction;
+
+        public hitStackElem(int currX, int currY, int nextX, int nextY, Direction direction) {
+            this.CurrX = currX;
+            this.CurrY = currY;
+            this.NextX = nextX;
+            this.NextY = nextY;
+            this.direction = direction;
+        }
+
+        public hitStackElem(hitStackElem HTE) {
+            this.CurrX = HTE.CurrX;
+            this.CurrY = HTE.CurrY;
+            this.NextX = HTE.NextX;
+            this.NextY = HTE.NextY;
+            this.direction = HTE.direction;
+        }
+
+        public void turnRight() {
+            direction = direction.getCW();
+        }
+
+        public void reverse() {
+            direction = direction.getOpposite();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            hitStackElem that = (hitStackElem) o;
+
+            if (CurrX != that.CurrX) return false;
+            if (CurrY != that.CurrY) return false;
+            return direction == that.direction;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = CurrX;
+            result = 31 * result + CurrY;
+            result = 31 * result + direction.hashCode();
+            return result;
+        }
     }
 }
