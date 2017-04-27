@@ -36,8 +36,8 @@ public class Util {
         }
     }
 
-    public static Stack<?> reverse(Stack<?> stack) {
-        Stack<?> temp = (Stack<?>)stack.clone();
+    public static Stack reverse(Stack stack) {
+        Stack temp = (Stack)stack.clone();
         Collections.reverse(temp);
         return temp;
     }

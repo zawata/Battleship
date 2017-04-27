@@ -7,8 +7,8 @@ public class SinglePlayerGame{
 	SinglePlayerGame() throws IOException{
 		MainGUI mainGUI = new MainGUI();
 
-		Human player1 = new Human();
-		CPU cpu = new CPU();
+		Human player1 = new Human("Human");
+		CPU cpu = new CPU("Not Human");
 
 		mainGUI.init(player1, cpu);
 

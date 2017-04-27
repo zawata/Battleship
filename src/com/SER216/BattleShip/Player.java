@@ -13,6 +13,8 @@ public class Player {
     protected int[][] shipBoard = new int[boardWidth][boardWidth];
     protected int[][] shotBoard = new int[boardWidth][boardWidth];
 
+    protected String name;
+
     //crude implementation of fixed Length Set
     protected List<Ship> shipFleet = new ArrayList<>();
     protected boolean addShip(Ship ship) {
@@ -22,7 +24,8 @@ public class Player {
         return false;
     }
 
-    protected Player() {
+    protected Player( String name) {
+        this.name = name;
         for(int i = 0; i < boardWidth; i++) {
             for(int j = 0; j < boardWidth; j++) {
                 shipBoard[i][j] = MainGUI.TileColors.Blank.getValue();
@@ -70,7 +73,7 @@ public class Player {
                 if (ship.Occupies(x, y)) {
                     ship.hit();
                     if(ship.isSunk())
-                        return 2;
+                        return ship.getSize();
                 }
             }
             return 1;
@@ -79,15 +82,25 @@ public class Player {
         }
     }
 
+    protected boolean validShot(int x, int y) {
+        try {
+            return getShotBoardValue(x, y) == MainGUI.TileColors.Blank.getValue();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            return false;
+        }
+    }
+
+    public String getName() { return name; }
+
     /**
      * Values passed are 1-indexed
      */
     protected int getShipBoardValue(int x, int y) { return shipBoard[x-1][y-1]; }
-    protected int getShotBoardValue(int x, int y) { return shipBoard[x-1][y-1]; }
+    protected int getShotBoardValue(int x, int y) { return shotBoard[x-1][y-1]; }
 
     /**
      * Values passed are 1-indexed
      */
     protected void setShipBoardValue(int x, int y, int value) { shipBoard[x-1][y-1] = value; }
-    protected void setShotBoardValue(int x, int y, int value) { shipBoard[x-1][y-1] = value; }
+    protected void setShotBoardValue(int x, int y, int value) { shotBoard[x-1][y-1] = value; }
 }
