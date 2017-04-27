@@ -135,16 +135,16 @@ public class Ship {
     }
 
     public boolean Occupies(int x, int y) {
-        if (this.directionOfShip.equals("Vertical")) {
-            if (this.x == x) {
-                if (this.y <= y && y <= (this.y + this.getSize())) {
+        if (this.directionOfShip.equals(Direction.Vertical)) {
+            if(this.x == x) {
+                if (this.y <= y && y < (this.y + this.getSize())) {
                     return true;
                 }
             }
         } else {
-            if (this.directionOfShip.equals("Horizontal")) {
-                if (this.y == y) {
-                    if (this.x <= x && x <= (this.x + this.getSize())) {
+            if (this.directionOfShip.equals(Direction.Horizontal)) {
+                if(this.y == y) {
+                    if (this.x <= x && x < (this.x + this.getSize())) {
                         return true;
                     }
                 }
