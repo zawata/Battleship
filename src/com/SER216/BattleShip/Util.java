@@ -1,5 +1,8 @@
 package com.SER216.BattleShip;
 
+import java.util.Collections;
+import java.util.Stack;
+
 /**
  * Created by zawata on 4/12/2017.
  */
@@ -8,7 +11,7 @@ public class Util {
     public static final int boardWidth = 10;
 
     // resource location
-    public static final String resources = "src/main/resources/";
+    public static final String resources = "src/resources/";
 
     // Returns the value of the game coordinates given pixels of the click
     public static int getGrid(int x) {
@@ -31,5 +34,11 @@ public class Util {
         else {
             return 0;
         }
+    }
+
+    public static Stack<?> reverse(Stack<?> stack) {
+        Stack<?> temp = (Stack<?>)stack.clone();
+        Collections.reverse(temp);
+        return temp;
     }
 }

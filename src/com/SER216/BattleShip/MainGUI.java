@@ -115,7 +115,6 @@ public class MainGUI {
         cpuBoardPanel.add(cpuBoard);
         cpuBoardPanel.setBounds(505, 173, 500, 500);
 
-
         // Directions text
         directionsTxt = new JTextArea("Game directions\n\n" +
                 "1. Select a ship from the leftmost box below.\n" +
@@ -206,7 +205,7 @@ public class MainGUI {
         panel.removeAll();
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
-                TileColors color = getColorByValue(player.getBoardValue(x, y));
+                TileColors color = getColorByValue(player.getShipBoardValue(x, y));
                 if(!color.equals(TileColors.Blank))
                 {
                     if(!drawTile(panel, color, x, y)) {
