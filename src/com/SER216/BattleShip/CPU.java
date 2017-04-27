@@ -16,10 +16,12 @@ import static com.SER216.BattleShip.Util.reverse;
  */
 public class CPU extends Player {
     private Random rand = new Random();
+    private long seed;
 
     public CPU(String name) {
         super(name);
-        rand.setSeed(0);
+        this.seed = rand.nextLong();
+        rand.setSeed(seed);
     }
 
     private enum Direction {
@@ -296,6 +298,8 @@ public class CPU extends Player {
                         reversed = false;
                         hitStackElem temp = hitStack.pop();
                         temp.turnRight();
+                        temp.NextX = temp.CurrX + temp.direction.getXvalue();
+                        temp.NextY = temp.CurrY + temp.direction.getYvalue();
                         hitStack.push(temp);
                     }
                     return true;
@@ -329,7 +333,9 @@ public class CPU extends Player {
                     }
                     return true;
                 default:
+                    System.out.println("shot " + newShotX + " " + newShotY);
                     throw new IOException("Unhandled ReceiveShot Number: " + retVal);
+
             }
         }
     }
