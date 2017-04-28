@@ -16,12 +16,13 @@ import static com.SER216.BattleShip.Util.reverse;
  */
 public class CPU extends Player {
     private Random rand = new Random();
-    private long seed;
+    private long seed = 8049977677039772380L;
 
     public CPU(String name) {
         super(name);
-        this.seed = rand.nextLong();
+        this.seed = (this.seed != 0 && MainGUI.DEBUG) ? this.seed : rand.nextLong();
         rand.setSeed(seed);
+        System.out.println("Seed: " + seed);
     }
 
     private enum Direction {
@@ -260,9 +261,29 @@ public class CPU extends Player {
                         //System.out.println("tileCheck: " + (MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank)));
                         if (!(checkBounds(newShotX) & checkBounds(newShotY)) ||
                                 !(MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank))) {
-                            hitStackElem temp = hitStack.pop();
-                            temp.turnRight();
-                            hitStack.push(temp);
+                            if(hitStack.size() > 1) {
+                                Direction old_direction = hitStack.peek().direction;
+                                hitStackElem origin_elem = hitStack.elementAt(0);
+                                for (Object elem : reverse(hitStack)) {
+                                    hitStackElem HTElem = (hitStackElem) elem;
+                                    if (old_direction.equals(HTElem.direction)) {
+                                        origin_elem = HTElem;
+                                    } else {
+                                        break;
+                                    }
+                                }
+                                hitStackElem top = hitStack.pop();
+                                origin_elem.reverse();
+                                top.NextX = origin_elem.CurrX + origin_elem.direction.getXvalue();
+                                top.NextY = origin_elem.CurrY + origin_elem.direction.getYvalue();
+                                hitStack.push(top);
+                            } else {
+                                hitStackElem temp = hitStack.pop();
+                                temp.turnRight();
+                                temp.NextX = temp.CurrX + temp.direction.getXvalue();
+                                temp.NextY = temp.CurrY + temp.direction.getYvalue();
+                                hitStack.push(temp);
+                            }
                         }
                         else {
                             shotSet = true;
