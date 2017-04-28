@@ -17,9 +17,10 @@ public class Menu {
 	private JPanel mainPanel = new JPanel();
 	final static int size_x = 350;
 	final static int size_y = 433;
-	final static File file_1 = new File(resources + "title_menu.gif");
-	final static File file_2 = new File(resources + "credits.jpg");
-	public Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
+
+	Image title_menu = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/menu/title_menu.gif"));
+	Image credits = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/menu/credits.jpg"));
+	Image icon = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/menu/icon.gif"));
 
 	// Creates the main menu
 	Menu() throws IOException {
@@ -37,14 +38,13 @@ public class Menu {
 			inFrame.setSize(size_x, size_y);
 			inFrame.getContentPane().setBackground(Color.BLACK);
 			inFrame.setLayout(new GridLayout(2, 1));
-			inFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			inFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 			inPanel.setLayout(new GridLayout(3, 1));
 			inPanel.setOpaque(true);
 			inPanel.setBackground(Color.BLACK);
-			inFrame.add((new JLabel(new ImageIcon(ImageIO.read(file_1)))), BorderLayout.NORTH);
+			inFrame.add(new JLabel(new ImageIcon(title_menu)), BorderLayout.NORTH);
 			inFrame.add(inPanel, BorderLayout.SOUTH);
 			inFrame.setResizable(false);
-			Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 			inFrame.setIconImage(icon);
 			inFrame.setVisible(true);
 		}
@@ -99,7 +99,7 @@ public class Menu {
 		creditsFrame.setSize(size_x, size_y);
 		creditsFrame.setBackground(Color.BLACK);
 		creditsFrame.setLayout(new GridLayout(1, 1));
-		creditsFrame.add((new JLabel(new ImageIcon(ImageIO.read(file_2)))));
+		creditsFrame.add((new JLabel(new ImageIcon(credits))));
 		creditsFrame.setResizable(false);
 		creditsFrame.setIconImage(icon);
 		creditsFrame.setVisible(true);

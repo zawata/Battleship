@@ -1,0 +1,10 @@
+<component name="ArtifactManager">
+  <artifact build-on-make="true" name="BattleShipGame:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/BattleShipGame_jar</output-path>
+    <root id="root">
+      <element id="archive" name="BattleShipGame.jar">
+        <element id="module-output" name="BattleShipGame" />
+      </element>
+    </root>
+  </artifact>
+</component>

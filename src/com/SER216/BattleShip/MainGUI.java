@@ -37,28 +37,25 @@ public class MainGUI {
     private final JLabel playerBoard = new JLabel();
     private final JLabel cpuBoard = new JLabel();
 
-    private final static File headerIMG = new File(resources + "lg_head.jpg");
-    private final static File boardIMG = new File(resources + "board.gif");
-
-    private final static File file_green = new File(resources + "green.gif");
-    private final static File file_blue = new File(resources + "blue.gif");
-    private final static File file_red = new File(resources + "red.gif");
-    private final static File file_grey = new File(resources + "grey.gif");
-    private final static File file_black = new File(resources + "black.gif");
+    private final static Image headerIMG = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/main/lg_head.jpg"));
+    private final static Image boardIMG = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/main/board.gif"));
 
     public enum TileColors {
-        Blank(0, null),       // Nothing
-        Green(1, file_green), // Ship
-        Blue (2, file_blue ), // ??
-        Red  (3, file_red  ), // Hit
-        Grey (4, file_grey ), // Miss
-        Black(5, file_black); // Sunk
+        Blank(0, null),        // Nothing
+        Green(1, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/green.gif"))), // Ship
+        Blue (2, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/blue.gif"))), // ??
+        Red  (3, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/red.gif"))), // Hit
+        Grey (4, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/grey.gif"))), // Miss
+        Black(5, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/black.gif"))); // Sunk
 
         private final int value;
-        private final File file;
-        TileColors(final int value, final File file) { this.value = value; this.file = file; }
+        private final Image file;
+        TileColors(final int value, final Image file) {
+            this.value = value;
+            this.file = file;
+        }
         public int getValue() { return value; }
-        public File getFile() { return file; }
+        public Image getImage() { return file; }
     }
 
     public static TileColors getColorByValue(int value) {
@@ -86,18 +83,18 @@ public class MainGUI {
         this.cpu = cpu;
         
         // player GameBoard
-        playerBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        playerBoard.setIcon(new ImageIcon(boardIMG));
         playerBoard.setBounds(0, 0, 500, 500);
 
-        playerBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        playerBoard.setIcon(new ImageIcon(boardIMG));
         playerBoard.setBounds(0, 0, 500, 500);
 
         // cpu GameBoard
-        cpuBoard.setIcon(new ImageIcon(ImageIO.read(boardIMG)));
+        cpuBoard.setIcon(new ImageIcon(boardIMG));
         cpuBoard.setBounds(0, 0, 500, 500);
 
         // battleship header
-        JLabel headerLabel = (new JLabel(new ImageIcon(ImageIO.read(headerIMG))));
+        JLabel headerLabel = (new JLabel(new ImageIcon(headerIMG)));
         headerLabel.setBounds(0, 0, size_xL, 163);
 
         // place Controls
@@ -237,18 +234,11 @@ public class MainGUI {
      */
     @SuppressWarnings("Duplicates")
     private boolean drawTile(JPanel panel, TileColors color, int x, int y) {
-        try {
-            if (x <= 10 && y <= 10) {
-                JLabel img = (new JLabel(new ImageIcon(ImageIO.read(color.getFile()))));
-                img.setBounds(x * 45, y * 45, 45, 45);
-                panel.add(img);
-                return true;
-            }
-        }
-        catch(IOException e) {
-            //TODO Consider removing the exit here? Throw the exception up the chain?
-            JOptionPane.showMessageDialog(null, ("Image File " + color.getFile().getPath() + " Not Found."), "Error", JOptionPane.ERROR_MESSAGE);
-            System.exit(1);
+        if (x <= 10 && y <= 10) {
+            JLabel img = (new JLabel(new ImageIcon(color.getImage())));
+            img.setBounds(x * 45, y * 45, 45, 45);
+            panel.add(img);
+            return true;
         }
         return false;
     }
