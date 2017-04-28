@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.SER216.Battleship;
 
 import com.SER216.BattleShip.CPU;
@@ -46,7 +41,7 @@ public class PlayerTest {
     private Human instance;
      
     public PlayerTest() throws IOException {
-        this.instance = new Human();
+        this.instance = new Human("human");
         MockitoAnnotations.initMocks(this);
         
 
@@ -66,6 +61,7 @@ public class PlayerTest {
      * Test of isRange method, of class Player.
      * @throws java.lang.Exception
      */
+    /*
     @Test
     public void testPlayerPlacement() throws Exception {
         System.out.println("isRange");
@@ -107,7 +103,7 @@ public class PlayerTest {
     @Test
     public void testremoveOldShip() throws IOException{
         System.out.println("removeOldShip");        
-        int x = 0;
+        int CurrX = 0;
         
         instance.setShipName("Destroyer");
         ship.size = 3;
@@ -116,9 +112,9 @@ public class PlayerTest {
         int[][] board = instance.getBoard();
         
         //sets board spaces to 1
-        while(x < ship.size){
-            board[ship.getX()][x] = 1;
-            x++;
+        while(CurrX < ship.size){
+            board[ship.getX()][CurrX] = 1;
+            CurrX++;
         }
         
         //sets board spaces to 0
@@ -127,5 +123,5 @@ public class PlayerTest {
         assertEquals(0, board[ship.getX()][9]);
 
     }
-
+*/
 }

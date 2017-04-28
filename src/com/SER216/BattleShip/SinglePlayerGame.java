@@ -8,7 +8,7 @@ public class SinglePlayerGame{
 		MainGUI mainGUI = new MainGUI();
 
 		Human player1 = new Human("Human");
-		CPU cpu = new CPU("Not Human");
+		CPU cpu = new CPU("CPU");
 
 		mainGUI.init(player1, cpu);
 
