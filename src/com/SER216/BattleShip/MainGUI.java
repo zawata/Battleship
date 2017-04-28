@@ -1,5 +1,7 @@
 package com.SER216.BattleShip;
 
+import javafx.scene.transform.Rotate;
+
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
@@ -42,20 +44,22 @@ public class MainGUI {
 
     public enum TileColors {
         Blank(0, null),        // Nothing
-        Green(1, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/green.gif"))), // Ship
-        Blue (2, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/blue.gif"))), // ??
-        Red  (3, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/red.gif"))), // Hit
-        Grey (4, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/grey.gif"))), // Miss
-        Black(5, Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("resources/tiles/black.gif"))); // Sunk
+        Green(1, "resources/tiles/green.gif"), // Ship
+        Blue (2, "resources/tiles/blue.gif"), // ??
+        Red  (3, "resources/tiles/red.gif"), // Hit
+        Grey (4, "resources/tiles/grey.gif"), // Miss
+        Black(5, "resources/tiles/black.gif"); // Sunk
 
         private final int value;
-        private final Image file;
-        TileColors(final int value, final Image file) {
+        private final String file;
+        TileColors(final int value, final String file) {
             this.value = value;
             this.file = file;
         }
         public int getValue() { return value; }
-        public Image getImage() { return file; }
+        public Image getTileImage() {
+            return Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource(file));
+        }
     }
 
     public static TileColors getColorByValue(int value) {
@@ -202,6 +206,14 @@ public class MainGUI {
 
     public boolean redrawBoard(Player player, JPanel panel, JLabel board, boolean drawShips) {
         panel.removeAll();
+        if(drawShips) {
+            for (Ship ship : player.shipFleet) {
+                if (ship.isPlaced()) {
+
+                    drawShip(panel, ship);
+                }
+            }
+        }
 
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
@@ -235,8 +247,29 @@ public class MainGUI {
     @SuppressWarnings("Duplicates")
     private boolean drawTile(JPanel panel, TileColors color, int x, int y) {
         if (x <= 10 && y <= 10) {
-            JLabel img = (new JLabel(new ImageIcon(color.getImage())));
+            JLabel img = (new JLabel(new ImageIcon(color.getTileImage())));
             img.setBounds(x * 45, y * 45, 45, 45);
+            panel.add(img);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean drawShip(JPanel panel, Ship ship) {
+        ImageIcon imageicon = new ImageIcon(ship.getShipType().getImage());
+        JLabel img = null;
+        if (ship.isPlaced()) {
+            if(ship.getDirectionOfShip().equals(Ship.Direction.Horizontal)) {
+                imageicon = new ImageIcon(Util.rotate(ship.getShipType().getImage(), -90));
+                img = new JLabel(imageicon);
+                img.setBounds(ship.getX() * 45, ship.getY() * 45, ship.getSize()*45, 45);
+            }
+            else if(ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
+                imageicon = new ImageIcon(ship.getShipType().getImage());
+                img = new JLabel(imageicon);
+                img.setBounds(ship.getX() * 45, ship.getY() * 45, 45, ship.getSize()*45);
+            }
+
             panel.add(img);
             return true;
         }

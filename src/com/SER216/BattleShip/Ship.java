@@ -1,6 +1,8 @@
 package com.SER216.BattleShip;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 /**
  * Created by zawata on 4/12/2017.
@@ -14,17 +16,21 @@ public class Ship {
     private boolean placed;
 
     public enum ShipType {
-        AircraftCarrier(5, "Aircraft Carrier"),
-        Battleship(4, "Battleship"),
-        Destroyer(3, "Destroyer"),
-        Submarine(3, "Submarine"),
-        PatrolBoat(2, "Patrol Boat");
+        AircraftCarrier(5, "Aircraft Carrier", "resources/ships/AircraftCarrier.png"),
+        Battleship(4, "Battleship", "resources/tiles/blue.gif"),
+        Destroyer(3, "Destroyer", "resources/tiles/blue.gif"),
+        Submarine(3, "Submarine", "resources/tiles/blue.gif"),
+        PatrolBoat(2, "Patrol Boat", "resources/ships/PatrolBoat.png");
 
         private final int size;
         private final String name;
-        ShipType(final int size, String name) { this.size = size; this.name = name;}
+        private final String file;
+        ShipType(final int size, final String name, final String file) { this.size = size; this.name = name; this.file = file;}
         public int getSize() { return size; }
         public String getName() { return name; }
+        public Image getImage() {
+            return Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource(file));
+        }
     }
 
     public static ShipType getShipValuebyName(String name) {
@@ -90,22 +96,6 @@ public class Ship {
         this.x = 0;
         this.y = 0;
         this.hits = 0;
-    }
-
-    public void shipReset() {
-        x = 0;
-        y = 0;
-        directionOfShip = Direction.Horizontal;
-        placed = false;
-    }
-
-    //If hits on this ship equal its size, its sunk
-    public boolean sunk() {
-        if (this.hits == this.typeofShip.getSize()) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     public ShipType getShipType() { return typeofShip; }
