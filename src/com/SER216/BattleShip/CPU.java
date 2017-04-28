@@ -1,8 +1,5 @@
 package com.SER216.BattleShip;
 
-import com.SER216.Random.IRandomWrapper;
-import com.SER216.Random.RandomWrapper;
-
 
 import java.io.IOException;
 import java.util.Random;
@@ -17,6 +14,13 @@ import static com.SER216.BattleShip.Util.reverse;
 public class CPU extends Player {
     private Random rand = new Random();
     long seed = 8049977677039772380L;
+
+    public CPU() {
+        super("CPU");
+        this.seed = (this.seed != 0 && MainGUI.DEBUG) ? this.seed : rand.nextLong();
+        rand.setSeed(seed);
+        System.out.println("Seed: " + seed);
+    }
 
     public CPU(String name) {
         super(name);

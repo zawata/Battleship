@@ -24,7 +24,17 @@ public class Player {
         return false;
     }
 
-    protected Player( String name) {
+    protected Player() {
+        this.name = "Player";
+        for(int i = 0; i < boardWidth; i++) {
+            for(int j = 0; j < boardWidth; j++) {
+                shipBoard[i][j] = MainGUI.TileColors.Blank.getValue();
+                shotBoard[i][j] = MainGUI.TileColors.Blank.getValue();
+            }
+        }
+    }
+
+    protected Player(String name) {
         this.name = name;
         for(int i = 0; i < boardWidth; i++) {
             for(int j = 0; j < boardWidth; j++) {
