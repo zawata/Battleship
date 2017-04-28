@@ -59,7 +59,7 @@ public class Player {
      * -1 for error
      * 0 for miss
      * 1 for hit
-     * 2 for sunk
+     * 2-5 for sunk
      */
     protected int receiveShot(int x, int y) {
         if(getShipBoardValue(x, y) == MainGUI.TileColors.Blank.getValue()) {
@@ -72,8 +72,20 @@ public class Player {
             for(Ship ship : shipFleet) {
                 if (ship.Occupies(x, y)) {
                     ship.hit();
-                    if(ship.isSunk())
+                    if(ship.isSunk()) {
+                        if (ship.getDirectionOfShip().equals(Ship.Direction.Vertical)) {
+                            for (int i = 0; i < ship.getSize(); i++) {
+                                setShipBoardValue(ship.getX(), (i + ship.getY()), MainGUI.TileColors.Black.getValue());
+                            }
+                        } else {
+                            if (ship.getDirectionOfShip().equals(Ship.Direction.Horizontal)) {
+                                for (int i = 0; i < ship.getSize(); i++) {
+                                    setShipBoardValue((i + ship.getX()), ship.getY(), MainGUI.TileColors.Black.getValue());
+                                }
+                            }
+                        }
                         return ship.getSize();
+                    }
                 }
             }
             return 1;
