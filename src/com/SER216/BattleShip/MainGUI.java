@@ -72,10 +72,12 @@ public class MainGUI {
     public Image icon = Toolkit.getDefaultToolkit().getImage(resources + "icon.gif");
 
     //Players
-    Human player;
-    CPU    cpu;
+    private Human player;
+    private CPU cpu;
 
-    boolean player1_turn = false;
+    private boolean player1_turn = false;
+
+    static boolean DEBUG = false;
 
     // Loads the GUI for the game
     public void init(Human player1, CPU cpu) throws IOException {
@@ -207,10 +209,14 @@ public class MainGUI {
         for(int x = 1; x <= boardWidth; x++) {
             for(int y = 1; y <= boardWidth; y++) {
                 TileColors color = getColorByValue(player.getShipBoardValue(x, y));
-                if(!color.equals(TileColors.Blank) || (color.equals(TileColors.Green) && drawShips))
+                if(!color.equals(TileColors.Blank))
                 {
-                    if(!drawTile(panel, color, x, y)) {
-                        return false;
+                    if(color.equals(TileColors.Green) && !drawShips) {
+
+                    } else {
+                        if(!drawTile(panel, color, x, y)) {
+                            return false;
+                        }
                     }
                 }
             }
@@ -256,29 +262,28 @@ public class MainGUI {
             int y = Util.getGrid(e.getY());
 
             Ship selectedShip = new Ship(shipList.getSelectedValue(), directionList.getSelectedValue());
-
-            //debug code
-            player.addShip(new Ship(Ship.ShipType.AircraftCarrier.getName(), Ship.Direction.Horizontal.getName()), 2, 1);
-            player.addShip(new Ship(Ship.ShipType.Battleship.getName(), Ship.Direction.Horizontal.getName()), 2, 3);
-            player.addShip(new Ship(Ship.ShipType.Destroyer.getName(), Ship.Direction.Horizontal.getName()), 2, 5);
-            player.addShip(new Ship(Ship.ShipType.Submarine.getName(), Ship.Direction.Horizontal.getName()), 2, 7);
-            player.addShip(new Ship(Ship.ShipType.PatrolBoat.getName(), Ship.Direction.Horizontal.getName()), 2, 9);
-            redrawBoard(player, playerBoardPanel, playerBoard, true);
-            if (player.allShipsPlaced()) {
-                doneButton.setEnabled(true);
-            }
-            //\debugCode
-/*
-            if (x >= 1 && y >= 1) {
-                // the addShip Function performs all of the necessary board checks itself
-                if(player.addShip(selectedShip, x, y)){
-                    redrawBoard(player, playerBoardPanel, playerBoard, true);
-                    //redrawBoard(cpu, cpuBoardPanel, cpuBoard, true);
-                }
+            if(DEBUG) {
+                //debug code
+                player.addShip(new Ship(Ship.ShipType.AircraftCarrier.getName(), Ship.Direction.Horizontal.getName()), 2, 1);
+                player.addShip(new Ship(Ship.ShipType.Battleship.getName(), Ship.Direction.Horizontal.getName()), 2, 3);
+                player.addShip(new Ship(Ship.ShipType.Destroyer.getName(), Ship.Direction.Horizontal.getName()), 2, 5);
+                player.addShip(new Ship(Ship.ShipType.Submarine.getName(), Ship.Direction.Horizontal.getName()), 2, 7);
+                player.addShip(new Ship(Ship.ShipType.PatrolBoat.getName(), Ship.Direction.Horizontal.getName()), 2, 9);
+                redrawBoard(player, playerBoardPanel, playerBoard, true);
                 if (player.allShipsPlaced()) {
                     doneButton.setEnabled(true);
                 }
-            }*/
+            } else {
+                if (x >= 1 && y >= 1) {
+                    // the addShip Function performs all of the necessary board checks itself
+                    if (player.addShip(selectedShip, x, y)) {
+                        redrawBoard(player, playerBoardPanel, playerBoard, true);
+                    }
+                    if (player.allShipsPlaced()) {
+                        doneButton.setEnabled(true);
+                    }
+                }
+            }
         }
 
         public void mouseEntered(MouseEvent arg0) {}
@@ -298,31 +303,34 @@ public class MainGUI {
             int y = Util.getGrid(e.getY());
 
             if (x >= 1 && y >= 1 && player1_turn) {
-                if(!(last_X == x && last_Y == y)) { //prevent double clicking
+                if(!(last_X == x && last_Y == y)) { //click de-bouncing
                     last_X = x;
                     last_Y = y;
                     player1_turn = false;
                     try {
                         if (player.takeTurn(cpu, x, y)) {
-                            redrawBoard(cpu, cpuBoardPanel, cpuBoard, true);
+                            redrawBoard(cpu, cpuBoardPanel, cpuBoard, DEBUG);
                             while (!cpu.fire(player)) ;
                             redrawBoard(player, playerBoardPanel, playerBoard, true);
 
                             if (player.allShipsHit() || cpu.allShipsHit()) {
+                                redrawBoard(cpu, cpuBoardPanel, cpuBoard, true);
+                                redrawBoard(player, playerBoardPanel, playerBoard, true);
                                 if (player.allShipsHit() && cpu.allShipsHit()) {
-                                    JOptionPane.showMessageDialog(null, "It's a Draw?!?");
-                                } else if (player.allShipsHit()) {
-                                    JOptionPane.showMessageDialog(null, "Player " + player.getName() + " has Won!");
+                                    JOptionPane.showMessageDialog(null, "It's a Draw?!");
                                 } else if (player.allShipsHit()) {
                                     JOptionPane.showMessageDialog(null, "Player " + cpu.getName() + " has Won!");
+                                } else if (cpu.allShipsHit()) {
+                                    JOptionPane.showMessageDialog(null, "Player " + player.getName() + " has Won!");
                                 } else {
                                     //wat?
                                 }
+                                placeFrame.dispose();
                             } else {
                                 player1_turn = true;
                             }
                         } else {
-
+                            player1_turn = true;
                         }
                     } catch (IOException ex) {
                         JOptionPane.showMessageDialog(null, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
