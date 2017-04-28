@@ -16,7 +16,7 @@ import static com.SER216.BattleShip.Util.reverse;
  */
 public class CPU extends Player {
     private Random rand = new Random();
-    private long seed = 8049977677039772380L;
+    long seed = 8049977677039772380L;
 
     public CPU(String name) {
         super(name);
@@ -172,15 +172,12 @@ public class CPU extends Player {
         }
 
         if (hitStack.size() == 0) {
-            System.out.println("no hits");
             retVal = opponent.receiveShot(x, y);
             switch (retVal) {
                 case 0: //miss
-                    System.out.println("Random miss");
                     this.setShotBoardValue(x, y, MainGUI.TileColors.Grey.getValue());
                     return true;
                 case 1: //hit
-                    System.out.println("Random hit");
                     setShotBoardValue(x, y, MainGUI.TileColors.Red.getValue());
                     hitStack.push(new hitStackElem(
                             x,
@@ -190,10 +187,9 @@ public class CPU extends Player {
                             Direction.Up));
                     return true;
                 default:
-                    throw new IOException("Unhandled ReceiveShot Number: " + retVal);
+                    throw new IOException("Unhandled ReceiveShot Number: " + seed);
             }
         } else {
-            System.out.println("hitStack size: " + hitStack.size());
             int newShotX = 0;
             int newShotY = 0;
 
@@ -218,7 +214,7 @@ public class CPU extends Player {
                         hitStack.push(top);
                         break;
                     } else {
-                        throw new IOException("Size one ship?");
+                        throw new IOException("Size one ship? " + seed);
                     }
                 }
                 hitStackElem calcNext = new hitStackElem(hitStack.peek());
@@ -252,13 +248,11 @@ public class CPU extends Player {
                                 hitStack.push(top);
                                 break;
                             } else {
-                                throw new IOException("Size one ship?");
+                                throw new IOException("Size one ship? " + seed);
                             }
                         }
                         newShotX = hitStack.peek().CurrX + hitStack.peek().direction.getXvalue();
                         newShotY = hitStack.peek().CurrY + hitStack.peek().direction.getYvalue();
-                        System.out.println("boundsCheck: " + (checkBounds(newShotX) & checkBounds(newShotY)));
-                        //System.out.println("tileCheck: " + (MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank)));
                         if (!(checkBounds(newShotX) & checkBounds(newShotY)) ||
                                 !(MainGUI.getColorByValue(this.getShotBoardValue(newShotX, newShotY)).equals(MainGUI.TileColors.Blank))) {
                             if(hitStack.size() > 1) {
@@ -337,7 +331,6 @@ public class CPU extends Player {
                 case 3: //sunk Submarine or Destroyer
                 case 4: //sunk Battleship
                 case 5: //sunk Carrier
-                    System.out.print("Sunk size:" + retVal);
                     setShotBoardValue(newShotX, newShotY, MainGUI.TileColors.Red.getValue()); //if its not displaying then we don't need to mark it black
 
                     // the number of values on the stack is one less than the size
@@ -354,8 +347,7 @@ public class CPU extends Player {
                     }
                     return true;
                 default:
-                    System.out.println("shot " + newShotX + " " + newShotY);
-                    throw new IOException("Unhandled ReceiveShot Number: " + retVal);
+                    throw new IOException("Unhandled ReceiveShot Number "  + seed);
 
             }
         }
