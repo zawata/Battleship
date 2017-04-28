@@ -85,25 +85,21 @@ public class Human extends Player {
             int retVal = opponent.receiveShot(x, y);
             switch (retVal) {
                 case 0: //miss
-                    System.out.println("player miss");
                     this.setShotBoardValue(x, y, MainGUI.TileColors.Grey.getValue());
                     return true;
                 case 1: //hit
-                    System.out.println("player hit");
                     setShotBoardValue(x, y, MainGUI.TileColors.Red.getValue());
                     return true;
                 case 2: //sunk Patrol Boat
                 case 3: //sunk Submarine or Destroyer
                 case 4: //sunk Battleship
                 case 5: //sunk Carrier
-                    System.out.println("player Sunk size:" + retVal);
                     setShotBoardValue(x, y, MainGUI.TileColors.Red.getValue()); //if its not displaying then we don't need to mark it black
                     return true;
                 default:
                     throw new IOException("Unhandled ReceiveShot Number");
             }
         } else {
-            System.out.println("invalid shot: " + x + " " + y);
             return false;
         }
     }
